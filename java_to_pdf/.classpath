@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-16">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/sano/Desktop/itext-5.5.6/itextpdf-5.5.6.jar"/>
+	<classpathentry kind="lib" path="C:/Users/sano/Desktop/itext-5.5.6/itextpdf-5.5.6-javadoc.jar"/>
+	<classpathentry kind="lib" path="C:/Users/sano/Desktop/itext-5.5.6/itextpdf-5.5.6-sources.jar"/>
+	<classpathentry kind="lib" path="C:/Users/sano/Desktop/itext-5.5.6/itext-pdfa-5.5.6.jar"/>
+	<classpathentry kind="lib" path="C:/Users/sano/Desktop/itext-5.5.6/itext-pdfa-5.5.6-javadoc.jar"/>
+	<classpathentry kind="lib" path="C:/Users/sano/Desktop/itext-5.5.6/itext-pdfa-5.5.6-sources.jar"/>
+	<classpathentry kind="lib" path="C:/Users/sano/Desktop/itext-5.5.6/itext-xtra-5.5.6.jar"/>
+	<classpathentry kind="lib" path="C:/Users/sano/Desktop/itext-5.5.6/itext-xtra-5.5.6-javadoc.jar"/>
+	<classpathentry kind="lib" path="C:/Users/sano/Desktop/itext-5.5.6/itext-xtra-5.5.6-sources.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
