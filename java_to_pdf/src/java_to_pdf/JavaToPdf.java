@@ -1,5 +1,6 @@
 package java_to_pdf;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -8,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
@@ -15,12 +17,21 @@ import com.itextpdf.text.Font;
 import com.itextpdf.text.Image;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.ColumnText;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfPageEventHelper;
 import com.itextpdf.text.pdf.PdfWriter;
 
-public class JavaToPdf {
+public class JavaToPdf extends PdfPageEventHelper{
+	
+	private static Phrase header;
+	private static Phrase footer;
+	
+	private static String imgName = "images/123123_new.jpg";
 	
 	private static ArrayList<ArrayList<Integer>> arrMonth = new ArrayList<ArrayList<Integer>>();
 
@@ -28,30 +39,57 @@ public class JavaToPdf {
 
 	public static void main(String[] args) throws DocumentException, IOException, Exception {
 				
-		//용지 사이즈
-		Document document = new Document(PageSize.A4,0,0,10,10);
+		//용지 사이즈 좌 우 상 하
+		Document document = new Document(PageSize.A4,10,10,25,25);
+		
+		JavaToPdf event = new JavaToPdf();
 		
 		//저장경로 추후 입력받아 수정할 것,
 		PdfWriter pdfWriter = PdfWriter.getInstance(document, new FileOutputStream("my_pdf.pdf"));
 		
-		//한글인코딩 위치 어디로?
-		BaseFont font = BaseFont.createFont("font/yoon.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-		Font titleFont = new Font(font, 20);
-		Font contentFont = new Font(font, 10);
+		//왼쪽 여백, 바닥글 여백, 오른쪽 여백, 머리글 여백
+		Rectangle rect = new Rectangle(90, 30, 750, 560);
 		
-		cellVerticalSize = 1;
+		pdfWriter.setBoxSize("art", rect);
+		
+		pdfWriter.setPageEvent(event);
+		
+		//한글 및 폰트
+		BaseFont font310 = BaseFont.createFont("font/yoon_320.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+		BaseFont font330 = BaseFont.createFont("font/yoon_330.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+		Font titleFont = new Font(font310, 20);
+		Font contentFont = new Font(font330, 10);
+		Font contentFontRed = new Font(font330, 10);
+		contentFontRed.setColor(255, 0, 0);
+		Font contentFontBlue = new Font(font330, 10);
+		contentFontBlue.setColor(0, 0, 255);
+		Font contentFontSmall = new Font(font310,9);
+		Font contentFontSmallRed = new Font(font310,9);
+		contentFontSmallRed.setColor(255,0,0);
+		Font contentFontSmallBlue = new Font(font310,9);
+		contentFontSmallBlue.setColor(0,0,255);
+		
+		BaseColor baseColor = new BaseColor(244,221,237);
+		
+		//머리말 꼬리말 설정
+		header =  new Phrase("2021년 지역보호사업",contentFontSmall);
+		footer = new Phrase("광교종합사회복지관",contentFontSmall);
+
+		//월 선택
+		int selectMonth = 12;
+		
+		arrMonth = getCal(selectMonth-1);
+		
+		//페이지 회전	
+		document.setPageSize(PageSize.A4.rotate());
 		
 		//파일열기
 		document.open();
 		
-		//페이지 회전
-		document.setPageSize(PageSize.A4.rotate());
-		document.newPage();		
-		
 		//표 스타일
 		
 		//타이틀텍스트
-		Paragraph title = new Paragraph("2021년 12월 무료급식 제공 현황.",titleFont);
+		Paragraph title = new Paragraph("12월 도시락서비스 제공사진",titleFont);
 		
 		//타이틀 정렬
 		title.setAlignment(Element.ALIGN_CENTER);
@@ -59,75 +97,82 @@ public class JavaToPdf {
 		//표 작성
 		
 		//테이플 추가
+		
+		//표 크기
 		PdfPTable table = new PdfPTable(7);
+		table.setWidthPercentage(85);
 		
-		//각 셀 넓이 조정 (미완)
-//		table.setWidths(new int[] {cellVerticalSize,cellVerticalSize,cellVerticalSize,cellVerticalSize,cellVerticalSize,cellVerticalSize,cellVerticalSize});
-//		table.setWidths(new int[] {1,1,1,1,1,1,1});
+		String weekName[] = {"일","월","화","수","목","금","토"};
 		
-		System.out.println(cellVerticalSize);
-		PdfPCell titleMon = new PdfPCell(new Paragraph("월",contentFont));
-		PdfPCell titleTue = new PdfPCell(new Paragraph("화",contentFont));
-		PdfPCell titleWen = new PdfPCell(new Paragraph("수",contentFont));
-		PdfPCell titleThu = new PdfPCell(new Paragraph("목",contentFont));
-		PdfPCell titleFri = new PdfPCell(new Paragraph("금",contentFont));
-		PdfPCell titleSet = new PdfPCell(new Paragraph("토",contentFont));
-		PdfPCell titleSun = new PdfPCell(new Paragraph("일",contentFont));
-		PdfPCell titleWeek = new PdfPCell(new Paragraph("요일",contentFont));
+		//셀 요일
+		for(int i = 0; i < 7; i++) {
+			PdfPCell loopCell;
+			if(weekName[i].equals("토")) {
+				loopCell = new PdfPCell(new Paragraph(weekName[i],contentFontBlue));
+			}else if(weekName[i].equals("일")) {
+				loopCell = new PdfPCell(new Paragraph(weekName[i],contentFontRed));
+				
+			}else {
+				loopCell = new PdfPCell(new Paragraph(weekName[i],contentFont));
+			}
+			loopCell.setPaddingTop(0);
+			loopCell.setPaddingBottom(3);
+			loopCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+			loopCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+			loopCell.setBackgroundColor(baseColor);
+			table.addCell(loopCell);
+		}
 
-		//표 정렬
-		//가로 가운데
-		titleMon.setHorizontalAlignment(Element.ALIGN_CENTER);
-		titleTue.setHorizontalAlignment(Element.ALIGN_CENTER);
-		titleWen.setHorizontalAlignment(Element.ALIGN_CENTER);
-		titleThu.setHorizontalAlignment(Element.ALIGN_CENTER);
-		titleFri.setHorizontalAlignment(Element.ALIGN_CENTER);
-		titleSet.setHorizontalAlignment(Element.ALIGN_CENTER);
-		titleSun.setHorizontalAlignment(Element.ALIGN_CENTER);
-		titleWeek.setHorizontalAlignment(Element.ALIGN_CENTER);
-		
-		//세로 가운데
-		titleMon.setVerticalAlignment(Element.ALIGN_MIDDLE);
-		titleTue.setVerticalAlignment(Element.ALIGN_MIDDLE);
-		titleWen.setVerticalAlignment(Element.ALIGN_MIDDLE);
-		titleThu.setVerticalAlignment(Element.ALIGN_MIDDLE);
-		titleFri.setVerticalAlignment(Element.ALIGN_MIDDLE);
-		titleSet.setVerticalAlignment(Element.ALIGN_MIDDLE);
-		titleSun.setVerticalAlignment(Element.ALIGN_MIDDLE);
-		titleWeek.setVerticalAlignment(Element.ALIGN_MIDDLE);
-		
-		//표 삽입
-		table.addCell(titleSun);
-		table.addCell(titleMon);
-		table.addCell(titleTue);
-		table.addCell(titleWen);
-		table.addCell(titleThu);
-		table.addCell(titleFri);
-		table.addCell(titleSet);
-		
 		//내용 입력		
 		
-		List list = new ArrayList();
-		Map firstLine = new HashMap();
-		firstLine.put("1","");
-		firstLine.put("2","");
-		firstLine.put("3","1");
-		firstLine.put("4","2");
-		firstLine.put("5","3");
-		firstLine.put("6","4");
-		firstLine.put("7","5");
-		
-		list.add(firstLine);
-		
-		for(int i = 0; i < 41; i++) {
-			table.addCell(new Paragraph(i+"번째",contentFont));
+		int a = 0;
+		for(int i = 0; i < arrMonth.size(); i++) {
+			for(int j = 0; j < 7; j++) {
+				if(arrMonth.get(i).get(0) != null || arrMonth.get(i).get(6) != null) {
+					if(arrMonth.get(i).get(j) == null) {
+						PdfPCell cell = new PdfPCell(new Paragraph(""));
+						cell.setBackgroundColor(baseColor);
+						table.addCell(cell);
+					}else {
+						PdfPCell cell;
+						
+						if(j == 0){
+							cell = new PdfPCell(new Paragraph(arrMonth.get(i).get(j)+"",contentFontSmallRed));
+							
+						}else if(j == 6) {
+							cell = new PdfPCell(new Paragraph(arrMonth.get(i).get(j)+"",contentFontSmallBlue));
+							
+						}else {
+							cell = new PdfPCell(new Paragraph(arrMonth.get(i).get(j)+"",contentFontSmall));
+						}
+						cell.setPaddingBottom(3);
+						cell.setPaddingTop(0);
+						cell.setBackgroundColor(baseColor);
+						cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+						cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+						table.addCell(cell);
+					}
+					a = j;
+				}
+				else {
+					a = 0;
+				}
+			}
+			// 이미지 넣기
+			if(a == 6) {
+				for(int k = 0; k < 7; k++) {
+					if(arrMonth.get(i).get(k) != null) {
+						table.addCell(Image.getInstance(imgName));
+					}else {
+						table.addCell(new Paragraph());
+					}
+				}
+			}
 		}
-		table.addCell(Image.getInstance("images/20211208.png"));
-		
 		
 		//표 삽입
 		document.add(new Paragraph(title));
-		document.add(new Paragraph("\n\n"));
+		document.add(new Paragraph("\n",contentFont));
 		document.add(table);
 		
 		//파일닫기
@@ -135,15 +180,11 @@ public class JavaToPdf {
 		
 		System.out.println("pdf생성 성공");
 		
-		
-		int selectMonth = 1;
-		
-		arrMonth = cal(selectMonth-1);
-		
 		System.out.println(arrMonth.size());
 		
+		//해당 달력 출력
 		for(int i=0; i < arrMonth.size(); i++) {
-			for(int j = 0; j < 7; j++) {
+			for(int j = 0; j < arrMonth.get(i).size(); j++) {
 				System.out.print(arrMonth.get(i).get(j)+" ");
 			}
 			System.out.println("");
@@ -151,7 +192,7 @@ public class JavaToPdf {
 		
 		}
 	
-	public static ArrayList<ArrayList<Integer>> cal(int month) {
+	public static ArrayList<ArrayList<Integer>> getCal(int month) {
 		
 		ArrayList<ArrayList<Integer>> arrWeek = new ArrayList<ArrayList<Integer>>();
 		ArrayList<Integer> arrDay1 = new ArrayList<Integer>();
@@ -166,8 +207,6 @@ public class JavaToPdf {
 		cal.set(Calendar.MONTH, month);
 		
 		int maxDay1 = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
-		
-//		cal.set(Calendar.DATE, 1);
 		
 		for(int i = 1; i <= maxDay1; i++) {
 			cal.set(Calendar.DATE, i);
@@ -212,19 +251,29 @@ public class JavaToPdf {
 	public static void setArray(ArrayList<Integer> array, int kind) {
 		
 			if(array.size()==0) {
-				array.clear();
+				for(int i= 0; i<7; i++) {
+					array.add(0,null);
+				}	
 			}
 			else {
 				if(array.size()<7) {
 					int remain = 7 - array.size();
 					for(int i = 0; i < remain; i++) {
 						if(kind == 0) {
-							array.add(0, 0);
+							array.add(0, null);
 						}else {
-							array.add(array.size(),0);
+							array.add(array.size(),null);
 						}
 					}						
 				}		
 			}
 	}
+	 public void onStartPage(PdfWriter writer,Document document) {
+	    	Rectangle rect = writer.getBoxSize("art");
+	        ColumnText.showTextAligned(writer.getDirectContent(),Element.ALIGN_CENTER, header, rect.getLeft(), rect.getTop(), 0);
+	    }
+	 public void onEndPage(PdfWriter writer,Document document) {
+	    	Rectangle rect = writer.getBoxSize("art");
+	        ColumnText.showTextAligned(writer.getDirectContent(),Element.ALIGN_CENTER, footer, rect.getRight(), rect.getBottom(), 0);
+	    }
 }
