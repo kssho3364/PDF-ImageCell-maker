@@ -21,6 +21,7 @@ import com.itextpdf.text.Phrase;
 import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.ColumnText;
+import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfPageEventHelper;
@@ -35,17 +36,20 @@ public class JavaToPdf extends PdfPageEventHelper{
 	
 	private static ArrayList<ArrayList<Integer>> arrMonth = new ArrayList<ArrayList<Integer>>();
 
-	private static int cellVerticalSize;
-
-	public static void main(String[] args) throws DocumentException, IOException, Exception {
+	public JavaToPdf(ArrayList<String> fileList, String filePath, String getTitle, 
+			String getHeader, String getFooter, String getFileName, String selectedYear, 
+			String selectedMonth) throws DocumentException, IOException, Exception {
 				
 		//용지 사이즈 좌 우 상 하
 		Document document = new Document(PageSize.A4,10,10,25,25);
 		
-		JavaToPdf event = new JavaToPdf();
+//		JavaToPdf event = new JavaToPdf(fileList, filePath, getTitle, getHeader, 
+//				getFooter, getFileName, selectedYear, selectedMonth);
 		
 		//저장경로 추후 입력받아 수정할 것,
-		PdfWriter pdfWriter = PdfWriter.getInstance(document, new FileOutputStream("my_pdf.pdf"));
+		PdfWriter pdfWriter = PdfWriter.getInstance(document, new FileOutputStream(filePath+"\\"+getFileName+".pdf"));
+		
+		MyHeaderFooter event = new MyHeaderFooter();
 		
 		//왼쪽 여백, 바닥글 여백, 오른쪽 여백, 머리글 여백
 		Rectangle rect = new Rectangle(90, 30, 750, 560);
@@ -72,13 +76,12 @@ public class JavaToPdf extends PdfPageEventHelper{
 		BaseColor baseColor = new BaseColor(244,221,237);
 		
 		//머리말 꼬리말 설정
-		header =  new Phrase("2021년 지역보호사업",contentFontSmall);
-		footer = new Phrase("광교종합사회복지관",contentFontSmall);
+		header =  new Phrase(getHeader,contentFontSmall);
+		footer = new Phrase(getFooter,contentFontSmall);
 
 		//월 선택
-		int selectMonth = 12;
 		
-		arrMonth = getCal(selectMonth-1);
+		arrMonth = getCal(Integer.parseInt(selectedYear), Integer.parseInt(selectedMonth)-1);
 		
 		//페이지 회전	
 		document.setPageSize(PageSize.A4.rotate());
@@ -89,7 +92,7 @@ public class JavaToPdf extends PdfPageEventHelper{
 		//표 스타일
 		
 		//타이틀텍스트
-		Paragraph title = new Paragraph("12월 도시락서비스 제공사진",titleFont);
+		Paragraph title = new Paragraph(getTitle,titleFont);
 		
 		//타이틀 정렬
 		title.setAlignment(Element.ALIGN_CENTER);
@@ -158,7 +161,7 @@ public class JavaToPdf extends PdfPageEventHelper{
 					a = 0;
 				}
 			}
-			// 이미지 넣기
+			// 이미지 넣기 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 			if(a == 6) {
 				for(int k = 0; k < 7; k++) {
 					if(arrMonth.get(i).get(k) != null) {
@@ -192,7 +195,7 @@ public class JavaToPdf extends PdfPageEventHelper{
 		
 		}
 	
-	public static ArrayList<ArrayList<Integer>> getCal(int month) {
+	public static ArrayList<ArrayList<Integer>> getCal(int year,int month) {
 		
 		ArrayList<ArrayList<Integer>> arrWeek = new ArrayList<ArrayList<Integer>>();
 		ArrayList<Integer> arrDay1 = new ArrayList<Integer>();
@@ -204,6 +207,7 @@ public class JavaToPdf extends PdfPageEventHelper{
 		
 		Calendar cal = Calendar.getInstance();
 		
+		cal.set(Calendar.YEAR, year);
 		cal.set(Calendar.MONTH, month);
 		
 		int maxDay1 = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
@@ -248,6 +252,7 @@ public class JavaToPdf extends PdfPageEventHelper{
 	   
 	    return arrWeek;
 	}
+	//
 	public static void setArray(ArrayList<Integer> array, int kind) {
 		
 			if(array.size()==0) {
@@ -268,12 +273,19 @@ public class JavaToPdf extends PdfPageEventHelper{
 				}		
 			}
 	}
-	 public void onStartPage(PdfWriter writer,Document document) {
-	    	Rectangle rect = writer.getBoxSize("art");
+	
+	
+	class MyHeaderFooter extends PdfPageEventHelper {
+		
+//		PdfContentByte cb = writer.getDirectContent();
+		
+		public void onStartPage(PdfWriter writer,Document document) {
+			Rectangle rect = writer.getBoxSize("art");
 	        ColumnText.showTextAligned(writer.getDirectContent(),Element.ALIGN_CENTER, header, rect.getLeft(), rect.getTop(), 0);
-	    }
-	 public void onEndPage(PdfWriter writer,Document document) {
+	    	}
+		public void onEndPage(PdfWriter writer,Document document) {
 	    	Rectangle rect = writer.getBoxSize("art");
 	        ColumnText.showTextAligned(writer.getDirectContent(),Element.ALIGN_CENTER, footer, rect.getRight(), rect.getBottom(), 0);
 	    }
+	}	 
 }
