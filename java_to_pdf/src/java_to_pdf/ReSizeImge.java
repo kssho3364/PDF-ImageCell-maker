@@ -33,8 +33,6 @@ public class ReSizeImge extends JFrame {
 	ArrayList<String> htap = new ArrayList<String>(); // 파일들의 경로가 담겨있는 리스트
 	ArrayList<String> fileName = new ArrayList<String>();
 	
-	int isClickCombo = 0;
-	int isClickComboYear = 0;
 	String directPath = "";
 	
 	JComboBox<String> combo = new JComboBox<String>(MONTH);
@@ -190,16 +188,16 @@ public class ReSizeImge extends JFrame {
 			fileListLabel.setText(path);
 			fileCountLabel.setText(filePath.length+"개");
 			
-			System.out.println("etc"+filePath[0].getName());
-			
 			for(int i = 0; i < htap.size(); i++) {
 				System.out.println(htap.get(i));
+			}
+			for(int i = 0; i < fileName.size(); i++) {
+				System.out.println(fileName.get(i));
 			}
 		});
 		
 		selectPath_bt.addActionListener(e ->{
 			try {
-				isClickCombo = 0;
 				JFileChooser jchooser = new JFileChooser();
 				jchooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 				jchooser.showDialog(this, null);
@@ -213,30 +211,52 @@ public class ReSizeImge extends JFrame {
 			}
 		});
 		
-		combo.addActionListener(e ->{
-			isClickCombo = 1;
-		});
-		
-		comboYear.addActionListener(e ->{
-			isClickComboYear = 1;
-		});
-		
 		create_bt.addActionListener(e ->{
-			try {
-				new JavaToPdf(htap,directPath,inputTitle.getText(),inputHeader.getText(),inputFooter.getText()
-						, inputFileName.getText(),comboYear.getSelectedItem().toString(),combo.getSelectedItem().toString());
-			} catch (DocumentException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+			boolean isCheck = CheckEmptySpace();
+			if(htap.size() != 0) {
+				if(!directPath.equals("")) {
+					if(isCheck) {
+						int result = JOptionPane.showConfirmDialog(this,comboYear.getSelectedItem()+"년"+combo.getSelectedItem()+"월\n 맞습니까?","확인",JOptionPane.YES_NO_OPTION);
+						if(result == JOptionPane.YES_OPTION) {
+							try {
+								new JavaToPdf(htap,directPath,inputTitle.getText(),inputHeader.getText(),inputFooter.getText()
+										, inputFileName.getText(),comboYear.getSelectedItem().toString(),combo.getSelectedItem().toString());
+							} catch (DocumentException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							} catch (IOException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							} catch (Exception e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
+						}
+					}else {
+						JOptionPane.showMessageDialog(null,"기본 정보를 입력해주세요.", "경고",JOptionPane.WARNING_MESSAGE);
+					}
+				}else {
+					JOptionPane.showMessageDialog(null,"저장할 경로를 선택해주세요", "경고",JOptionPane.WARNING_MESSAGE);
+				}
+			}else {
+				JOptionPane.showMessageDialog(null,"파일을 선택해주세요.", "경고",JOptionPane.WARNING_MESSAGE);
 			}
 		});
 	}
-	
-
+	public boolean CheckEmptySpace() {
+		boolean count = true;
+		if(inputTitle.getText().toString().equals("")) {
+			count = false;
+		}
+		if(inputHeader.getText().toString().equals("")) {
+			count = false;
+		}
+		if(inputFooter.getText().toString().equals("")) {
+			count = false;
+		}
+		if(inputFileName.getText().toString().equals("")) {
+			count = false;
+		}
+		return count;
+	}
 }

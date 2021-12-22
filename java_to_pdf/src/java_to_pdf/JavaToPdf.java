@@ -5,9 +5,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.swing.JOptionPane;
 
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Document;
@@ -31,20 +34,33 @@ public class JavaToPdf extends PdfPageEventHelper{
 	
 	private static Phrase header;
 	private static Phrase footer;
+	private static Calendar cal = Calendar.getInstance();
 	
-	private static String imgName = "images/123123_new.jpg";
-	
+	private String emptyImagePath = "etc/emptyImage.png";
+		
 	private static ArrayList<ArrayList<Integer>> arrMonth = new ArrayList<ArrayList<Integer>>();
+	ArrayList<String> fileName = new ArrayList<String>();
 
 	public JavaToPdf(ArrayList<String> fileList, String filePath, String getTitle, 
 			String getHeader, String getFooter, String getFileName, String selectedYear, 
 			String selectedMonth) throws DocumentException, IOException, Exception {
-				
+	
+		//파일이름추출
+		for(int a = 0; a < fileList.size(); a++) {
+			String strFile = fileList.get(a).substring(fileList.get(a).length()-7, fileList.get(a).length()-5);
+			strFile = strFile.replaceAll("[^0-9]","");			
+			strFile = strFile.replaceAll(" ","");
+			strFile = String.format("%02d", Integer.parseInt(strFile));
+//			int intFile = String.format("%02d",strFile);
+			System.out.println("strFile "+strFile);
+			fileName.add(strFile);
+		}
+		Collections.sort(fileName);
+		for(int a = 0; a < fileName.size();a++) {
+			System.out.println("@@@@@@@@@@@@@@@@@@ : "+fileName.get(a)); 
+		}
 		//용지 사이즈 좌 우 상 하
 		Document document = new Document(PageSize.A4,10,10,25,25);
-		
-//		JavaToPdf event = new JavaToPdf(fileList, filePath, getTitle, getHeader, 
-//				getFooter, getFileName, selectedYear, selectedMonth);
 		
 		//저장경로 추후 입력받아 수정할 것,
 		PdfWriter pdfWriter = PdfWriter.getInstance(document, new FileOutputStream(filePath+"\\"+getFileName+".pdf"));
@@ -129,6 +145,10 @@ public class JavaToPdf extends PdfPageEventHelper{
 		//내용 입력		
 		
 		int a = 0;
+		int countName = 0;
+		
+		try {
+			
 		for(int i = 0; i < arrMonth.size(); i++) {
 			for(int j = 0; j < 7; j++) {
 				if(arrMonth.get(i).get(0) != null || arrMonth.get(i).get(6) != null) {
@@ -153,6 +173,7 @@ public class JavaToPdf extends PdfPageEventHelper{
 						cell.setBackgroundColor(baseColor);
 						cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
 						cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+						
 						table.addCell(cell);
 					}
 					a = j;
@@ -163,14 +184,34 @@ public class JavaToPdf extends PdfPageEventHelper{
 			}
 			// 이미지 넣기 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 			if(a == 6) {
-				for(int k = 0; k < 7; k++) {
-					if(arrMonth.get(i).get(k) != null) {
-						table.addCell(Image.getInstance(imgName));
+				for(int k = 0; k < arrMonth.get(i).size(); k++) {
+					if(countName < fileList.size()) {
+
+						if(arrMonth.get(i).get(k) != null) {
+							String formatDate = String.format("%02d", arrMonth.get(i).get(k));
+							
+							if(fileName.get(countName).equals(formatDate)) {
+							table.addCell(Image.getInstance(fileList.get(countName)));	
+							System.out.println("fileList "+fileList.get(countName));
+							countName++;
+							}else {
+							table.addCell(Image.getInstance(emptyImagePath));
+							}
+							System.out.println("formatData "+formatDate);
+							System.out.println(countName);
+						}else {
+							table.addCell(new Paragraph(""));
+						}
 					}else {
-						table.addCell(new Paragraph());
+						table.addCell(new Paragraph(""));
 					}
 				}
+				System.out.println("");
 			}
+		}
+		}
+		catch(Exception e) {
+			JOptionPane.showMessageDialog(null,"오류발생", "알림",JOptionPane.WARNING_MESSAGE);
 		}
 		
 		//표 삽입
@@ -181,9 +222,11 @@ public class JavaToPdf extends PdfPageEventHelper{
 		//파일닫기
 		document.close();
 		
+		JOptionPane.showMessageDialog(null,"파일생성 완료!", "알림",JOptionPane.WARNING_MESSAGE);
+		
 		System.out.println("pdf생성 성공");
 		
-		System.out.println(arrMonth.size());
+		System.out.println("arrMonth.size "+arrMonth.size());
 		
 		//해당 달력 출력
 		for(int i=0; i < arrMonth.size(); i++) {
@@ -204,8 +247,6 @@ public class JavaToPdf extends PdfPageEventHelper{
 		ArrayList<Integer> arrDay4 = new ArrayList<Integer>();
 		ArrayList<Integer> arrDay5 = new ArrayList<Integer>();
 		ArrayList<Integer> arrDay6 = new ArrayList<Integer>();
-		
-		Calendar cal = Calendar.getInstance();
 		
 		cal.set(Calendar.YEAR, year);
 		cal.set(Calendar.MONTH, month);
@@ -252,7 +293,7 @@ public class JavaToPdf extends PdfPageEventHelper{
 	   
 	    return arrWeek;
 	}
-	//
+	// 날짜 리스트 셋
 	public static void setArray(ArrayList<Integer> array, int kind) {
 		
 			if(array.size()==0) {
@@ -276,8 +317,6 @@ public class JavaToPdf extends PdfPageEventHelper{
 	
 	
 	class MyHeaderFooter extends PdfPageEventHelper {
-		
-//		PdfContentByte cb = writer.getDirectContent();
 		
 		public void onStartPage(PdfWriter writer,Document document) {
 			Rectangle rect = writer.getBoxSize("art");

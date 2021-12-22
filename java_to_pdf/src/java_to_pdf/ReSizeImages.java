@@ -29,20 +29,17 @@ public class ReSizeImages extends JFrame{
 	JLabel yearText = new JLabel("연도 선택");
 	JLabel monthText = new JLabel("월 선택");
 	String directPath = "";
-	private int isClickCombo = 0;
 	
 	String[] MONTH = {"1","2","3","4","5","6","7","8","9","10","11","12"};
 	ArrayList<Integer> YEAR = new ArrayList<Integer>();
 	
 	JComboBox<String> combo = new JComboBox<String>(MONTH);
-//	JComboBox<String> comboYear;
-	
+
 	ArrayList<String> htap = new ArrayList<String>();
 	ArrayList<String> fileName = new ArrayList<String>();
-		
-	public static void main(String[] args) {			
-		new ReSizeImages();
-	}
+
+	private String emptyImagePath = "etc/emptyImage/emptyImage.png";
+	private String emptyImageFilePath = "etc/emptyImage.png";
 	
 	public ReSizeImages(){
 		
@@ -96,17 +93,13 @@ public class ReSizeImages extends JFrame{
 		btn.setBounds(10,500,150,50);
 		btn2.setBounds(220,500,150,50);
 		
-		combo.addActionListener(e ->{
-			isClickCombo = 1;
-		});
 		btn.addActionListener(new OpenActionListener());
 		btn2.addActionListener(e ->{
-			System.out.println(isClickCombo);
 			if(htap.size() != 0) {
 				int result = JOptionPane.showConfirmDialog(this,comboYear.getSelectedItem()+"년"+combo.getSelectedItem()+"월\n 맞습니까?","확인",JOptionPane.YES_NO_OPTION);				
 				if(result == JOptionPane.YES_OPTION) {
 					try {
-						isClickCombo = 0;
+					
 					JFileChooser jchooser = new JFileChooser();
 					jchooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 					jchooser.showDialog(this, null);
@@ -189,6 +182,7 @@ public class ReSizeImages extends JFrame{
 		try {
 			
 			int weekCount = getWeekCount(selectedMonth, selectedYear);
+			System.out.println("weekCount : "+weekCount);
 			int imageHeight = 0;
 			if(weekCount == 6) {
 				imageHeight = 555;
@@ -213,12 +207,20 @@ public class ReSizeImages extends JFrame{
 				
 	            System.out.println(directPath + "\\" + fileName.get(i));
 			}
+			
+			Image img = ImageIO.read(new File(emptyImagePath));
+			Image resizeImage = img.getScaledInstance(900, imageHeight, Image.SCALE_SMOOTH);
+			BufferedImage newImage = new BufferedImage(900, imageHeight, BufferedImage.TYPE_INT_RGB);
+			Graphics g = newImage.getGraphics();
+            g.drawImage(resizeImage, 0, 0, null);
+            g.dispose();
+            ImageIO.write(newImage, "png", new File(emptyImageFilePath));
+            
 			JOptionPane.showMessageDialog(null,"편집이 완료되었습니다.\n편집창을 끄셔도 됩니다.", "알림",JOptionPane.WARNING_MESSAGE);
 	            
 			return;	
 			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return;
 		}
@@ -228,7 +230,7 @@ public class ReSizeImages extends JFrame{
 		Calendar cal = Calendar.getInstance();
 		
 		cal.set(Calendar.YEAR, selectedYear);
-		cal.set(Calendar.MONTH, selectedMonth);
+		cal.set(Calendar.MONTH, selectedMonth-1);
 		
 		int returnCount = cal.getActualMaximum(Calendar.WEEK_OF_MONTH);
 	
@@ -251,7 +253,6 @@ public class ReSizeImages extends JFrame{
 	            System.out.println("성공");
 			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
