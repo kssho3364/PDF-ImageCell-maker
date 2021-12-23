@@ -38,7 +38,6 @@ public class ReSizeImages extends JFrame{
 	ArrayList<String> htap = new ArrayList<String>();
 	ArrayList<String> fileName = new ArrayList<String>();
 
-	private String emptyImagePath = "etc/emptyImage/emptyImage.png";
 	private String emptyImageFilePath = "etc/emptyImage.png";
 	
 	public ReSizeImages(){
@@ -207,14 +206,6 @@ public class ReSizeImages extends JFrame{
 				
 	            System.out.println(directPath + "\\" + fileName.get(i));
 			}
-			
-			Image img = ImageIO.read(new File(emptyImagePath));
-			Image resizeImage = img.getScaledInstance(900, imageHeight, Image.SCALE_SMOOTH);
-			BufferedImage newImage = new BufferedImage(900, imageHeight, BufferedImage.TYPE_INT_RGB);
-			Graphics g = newImage.getGraphics();
-            g.drawImage(resizeImage, 0, 0, null);
-            g.dispose();
-            ImageIO.write(newImage, "png", new File(emptyImageFilePath));
             
 			JOptionPane.showMessageDialog(null,"편집이 완료되었습니다.\n편집창을 끄셔도 됩니다.", "알림",JOptionPane.WARNING_MESSAGE);
 	            
@@ -226,7 +217,7 @@ public class ReSizeImages extends JFrame{
 		}
 	}
 	
-	public static int getWeekCount(int selectedMonth, int selectedYear) {
+	private static int getWeekCount(int selectedMonth, int selectedYear) {
 		Calendar cal = Calendar.getInstance();
 		
 		cal.set(Calendar.YEAR, selectedYear);
@@ -237,25 +228,6 @@ public class ReSizeImages extends JFrame{
 		return returnCount;
 	}
 	
-	public static void Resizetest() {
-		try {
-				Image img = ImageIO.read(new File("images/123123.jpg"));
-				
-				Image resizeImage = img.getScaledInstance(900, 700, Image.SCALE_SMOOTH);
-				
-				BufferedImage newImage = new BufferedImage(900, 700, BufferedImage.TYPE_INT_RGB);
-				Graphics g = newImage.getGraphics();
-	            g.drawImage(resizeImage, 0, 0, null);
-	            g.dispose();
-	            ImageIO.write(newImage, "jpg", new File("images/123123_new.jpg"));
-	            
-				
-	            System.out.println("성공");
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
 	
 }
 

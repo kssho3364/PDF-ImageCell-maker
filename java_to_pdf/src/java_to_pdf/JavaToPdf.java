@@ -35,8 +35,10 @@ public class JavaToPdf extends PdfPageEventHelper{
 	private static Phrase header;
 	private static Phrase footer;
 	private static Calendar cal = Calendar.getInstance();
+	private static int imageHeight = 700;
 	
-	private String emptyImagePath = "etc/emptyImage.png";
+	private String emptyImagePath555 = "etc/emptyImage555.png";
+	private String emptyImagePath700 = "etc/emptyImage700.png";
 		
 	private static ArrayList<ArrayList<Integer>> arrMonth = new ArrayList<ArrayList<Integer>>();
 	ArrayList<String> fileName = new ArrayList<String>();
@@ -44,7 +46,15 @@ public class JavaToPdf extends PdfPageEventHelper{
 	public JavaToPdf(ArrayList<String> fileList, String filePath, String getTitle, 
 			String getHeader, String getFooter, String getFileName, String selectedYear, 
 			String selectedMonth) throws DocumentException, IOException, Exception {
-	
+		
+		int weekCount = getWeekCount(Integer.parseInt(selectedMonth), Integer.parseInt(selectedYear));
+		
+		if(weekCount == 6) {
+			imageHeight = 555;
+		}else {
+			imageHeight = 700;
+		}
+		
 		//파일이름추출
 		for(int a = 0; a < fileList.size(); a++) {
 			String strFile = fileList.get(a).substring(fileList.get(a).length()-7, fileList.get(a).length()-5);
@@ -195,15 +205,27 @@ public class JavaToPdf extends PdfPageEventHelper{
 							System.out.println("fileList "+fileList.get(countName));
 							countName++;
 							}else {
-							table.addCell(Image.getInstance(emptyImagePath));
+								if(imageHeight == 555) {
+									table.addCell(Image.getInstance(emptyImagePath555));
+								}else {
+									table.addCell(Image.getInstance(emptyImagePath700));
+								}
 							}
 							System.out.println("formatData "+formatDate);
 							System.out.println(countName);
 						}else {
-							table.addCell(new Paragraph(""));
+							if(imageHeight == 555) {
+								table.addCell(Image.getInstance(emptyImagePath555));
+							}else {
+								table.addCell(Image.getInstance(emptyImagePath700));
+							}
 						}
 					}else {
-						table.addCell(new Paragraph(""));
+						if(imageHeight == 555) {
+							table.addCell(Image.getInstance(emptyImagePath555));
+						}else {
+							table.addCell(Image.getInstance(emptyImagePath700));
+						}
 					}
 				}
 				System.out.println("");
@@ -327,4 +349,15 @@ public class JavaToPdf extends PdfPageEventHelper{
 	        ColumnText.showTextAligned(writer.getDirectContent(),Element.ALIGN_CENTER, footer, rect.getRight(), rect.getBottom(), 0);
 	    }
 	}	 
+	
+	private static int getWeekCount(int selectedMonth, int selectedYear) {
+		Calendar cal = Calendar.getInstance();
+		
+		cal.set(Calendar.YEAR, selectedYear);
+		cal.set(Calendar.MONTH, selectedMonth-1);
+		
+		int returnCount = cal.getActualMaximum(Calendar.WEEK_OF_MONTH);
+	
+		return returnCount;
+	}
 }
