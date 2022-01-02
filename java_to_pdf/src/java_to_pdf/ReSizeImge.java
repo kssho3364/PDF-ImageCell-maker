@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 public class ReSizeImge extends JFrame {
 
@@ -219,7 +221,14 @@ public class ReSizeImge extends JFrame {
 						int result = JOptionPane.showConfirmDialog(this,comboYear.getSelectedItem()+"년"+combo.getSelectedItem()+"월\n 맞습니까?","확인",JOptionPane.YES_NO_OPTION);
 						if(result == JOptionPane.YES_OPTION) {
 							try {
-								new JavaToPdf(htap,directPath,inputTitle.getText(),inputHeader.getText(),inputFooter.getText()
+								
+								ArrayList<String> fileList = new ArrayList<String>();
+								
+								fileList = sortArray(htap);
+								
+								
+								
+								new JavaToPdf(fileList,directPath,inputTitle.getText(),inputHeader.getText(),inputFooter.getText()
 										, inputFileName.getText(),comboYear.getSelectedItem().toString(),combo.getSelectedItem().toString());
 							} catch (DocumentException e1) {
 								// TODO Auto-generated catch block
@@ -258,5 +267,32 @@ public class ReSizeImge extends JFrame {
 			count = false;
 		}
 		return count;
+	}
+	public ArrayList<String> sortArray(ArrayList<String> arr){
+		ArrayList<String> fileList = new ArrayList<String>();
+		
+		int countArr = arr.size();
+		for(int a = 0; a < countArr; a++) {
+			int temp = 0;
+			int indexArr = 0;
+			
+			for(int i = 0; i < arr.size(); i++) {
+				String strFile = arr.get(i).substring(arr.get(i).length()-7, arr.get(i).length()-5);
+				strFile = strFile.replaceAll("[^0-9]","");			
+				strFile = strFile.replaceAll(" ","");
+				strFile = String.format("%02d", Integer.parseInt(strFile));
+				int intStr = Integer.parseInt(strFile);
+				if(intStr > temp) {
+					temp = intStr;
+					indexArr = i;
+				}
+			}
+			fileList.add(arr.get(indexArr));
+			arr.remove(indexArr);
+		}
+		
+		Collections.reverse(fileList);
+		
+		return fileList;
 	}
 }

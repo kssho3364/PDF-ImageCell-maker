@@ -61,11 +61,10 @@ public class JavaToPdf extends PdfPageEventHelper{
 			strFile = strFile.replaceAll("[^0-9]","");			
 			strFile = strFile.replaceAll(" ","");
 			strFile = String.format("%02d", Integer.parseInt(strFile));
-//			int intFile = String.format("%02d",strFile);
 			System.out.println("strFile "+strFile);
 			fileName.add(strFile);
 		}
-		Collections.sort(fileName);
+//		Collections.sort(fileName);
 		for(int a = 0; a < fileName.size();a++) {
 			System.out.println("@@@@@@@@@@@@@@@@@@ : "+fileName.get(a)); 
 		}
@@ -199,6 +198,7 @@ public class JavaToPdf extends PdfPageEventHelper{
 
 						if(arrMonth.get(i).get(k) != null) {
 							String formatDate = String.format("%02d", arrMonth.get(i).get(k));
+							System.out.println("rrrrrrrrrrrrrrrrrrrrrrrrr"+formatDate);
 							
 							if(fileName.get(countName).equals(formatDate)) {
 							table.addCell(Image.getInstance(fileList.get(countName)));	
